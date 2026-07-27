@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "icache.h"
 #include "rng.h"
 #include "aes.h"
 #include "gpio.h"
@@ -158,6 +159,7 @@ int main(void)
   MX_GPIO_Init();
   MX_RNG_Init();
   MX_SAES_AES_Init();
+  MX_ICACHE_Init();
   /* USER CODE BEGIN 2 */
 
   uint32_t rng_cr = hrng.Instance->CR;

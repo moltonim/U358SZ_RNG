@@ -21,16 +21,14 @@
 #include "aes.h"
 
 /* USER CODE BEGIN 0 */
-__ALIGN_BEGIN const uint32_t pInitVectAES[4] __ALIGN_END = {
-    0x00000000, 0x00000000, 0x00000000, 0x00000000
-};
-
+//    A1B2C3D4 E5F60718 293A4B5C 6D7E8F90
 /* USER CODE END 0 */
 
 CRYP_HandleTypeDef hcryp;
 __ALIGN_BEGIN static const uint32_t pKeySAES[4] __ALIGN_END = {
-		0xA1B2C3D4, 0xE5F60718, 0x293A4B5C, 0x6D7E8F90};
-
+                            0xA1B2C3D4,0xE5F60718,0x293A4B5C,0x6D7E8F90};
+__ALIGN_BEGIN static const uint32_t pInitVectSAES[4] __ALIGN_END = {
+                            0x00000000,0x00000000,0x00000000,0x00000000};
 
 /* SAES init function */
 
@@ -42,12 +40,13 @@ void MX_SAES_AES_Init(void)
   /* USER CODE END SAES_Init 0 */
 
   /* USER CODE BEGIN SAES_Init 1 */
-	hcryp.Init.pInitVect = (uint32_t *)pInitVectAES;
+	hcryp.Init.pInitVect = (uint32_t *)pInitVectSAES;
   /* USER CODE END SAES_Init 1 */
   hcryp.Instance = SAES;
   hcryp.Init.DataType = CRYP_NO_SWAP;
   hcryp.Init.KeySize = CRYP_KEYSIZE_128B;
   hcryp.Init.pKey = (uint32_t *)pKeySAES;
+  hcryp.Init.pInitVect = (uint32_t *)pInitVectSAES;
   hcryp.Init.Algorithm = CRYP_AES_CBC;
   hcryp.Init.DataWidthUnit = CRYP_DATAWIDTHUNIT_BYTE;
   hcryp.Init.KeyIVConfigSkip = CRYP_KEYIVCONFIG_ALWAYS;
