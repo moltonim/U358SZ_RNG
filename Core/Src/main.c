@@ -115,6 +115,14 @@ static void SystemClock_Config_Board(void)
 
     HAL_RCC_ConfigAttributes(RCC_RMVF, RCC_SEC_NPRIV);
 }
+
+
+__ALIGN_BEGIN uint32_t buf_in [SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
+  __ALIGN_BEGIN uint32_t buf_out[SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
+  __ALIGN_BEGIN uint32_t buf[SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
+//  __ALIGN_BEGIN uint32_t plain2[SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
+
+
 /* USER CODE END 0 */
 
 /**
@@ -161,14 +169,20 @@ int main(void)
   __NOP();
 
 
-  __ALIGN_BEGIN uint32_t buf_in [SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
-  __ALIGN_BEGIN uint32_t buf_out[SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
-  //memcpy(buf_in, plain, len);
+
+  memcpy(buf_in, "Hello AES World!", 16);
 
   if (HAL_CRYP_Encrypt(&hcryp, buf_in, 16, buf_out, HAL_MAX_DELAY) != HAL_OK)
   {
 	  return -3;
   }
+
+  if (HAL_CRYP_Decrypt(&hcryp, buf_out, 16, buf, HAL_MAX_DELAY) != HAL_OK)
+  {
+	  return -4;
+  }
+
+
 
   //HAL_CRYP_Encrypt(&hcryp, plain, 16, cipher, HAL_MAX_DELAY);
 
