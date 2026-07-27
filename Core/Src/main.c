@@ -143,8 +143,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  SystemClock_Config_Board();
-    goto clock_done;
+  //SystemClock_Config_Board();
+    //goto clock_done;
   /* USER CODE END Init */
 
   /* Configure the system clock */
