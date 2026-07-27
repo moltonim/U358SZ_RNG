@@ -73,18 +73,14 @@ void MX_RNG_Init(void)
 	SET_BIT(RNG->CR, RNG_CR_RNGEN);
 
 	uint32_t sr = RNG->SR;
-	  /* USER CODE END RNG_Init 1 */
-
-
-	hrng.Instance = RNG;
-	hrng.Init.ClockErrorDetection = RNG_CED_DISABLE;
-
-
-	if (HAL_RNG_Init(&hrng) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN RNG_Init 2 */
+  /* USER CODE END RNG_Init 1 */
+  hrng.Instance = RNG;
+  hrng.Init.ClockErrorDetection = RNG_CED_DISABLE;
+  if (HAL_RNG_Init(&hrng) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RNG_Init 2 */
 	CLEAR_BIT(RNG->CR, RNG_CR_RNGEN);
 	while(READ_BIT(RNG->SR, RNG_SR_BUSY));
 

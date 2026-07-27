@@ -19,11 +19,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "rng.h"
+#include "aes.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,7 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define SEC_MAX_CRYPTO_BUF	256
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -148,6 +149,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_RNG_Init();
+  MX_SAES_AES_Init();
   /* USER CODE BEGIN 2 */
 
   uint32_t rng_cr = hrng.Instance->CR;
@@ -157,6 +159,18 @@ int main(void)
 
   uint32_t rcc_cr = RCC->CR;
   __NOP();
+
+
+  __ALIGN_BEGIN uint32_t buf_in [SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
+  __ALIGN_BEGIN uint32_t buf_out[SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
+  //memcpy(buf_in, plain, len);
+
+  if (HAL_CRYP_Encrypt(&hcryp, buf_in, 16, buf_out, HAL_MAX_DELAY) != HAL_OK)
+  {
+	  return -3;
+  }
+
+  //HAL_CRYP_Encrypt(&hcryp, plain, 16, cipher, HAL_MAX_DELAY);
 
   /* USER CODE END 2 */
 
