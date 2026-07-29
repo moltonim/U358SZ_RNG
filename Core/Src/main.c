@@ -18,7 +18,13 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "i2c.h"
 #include "icache.h"
+#include "usart.h"
+#include "rtc.h"
+#include "tamp.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -89,6 +95,14 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_ICACHE_Init();
+  MX_TIM3_Init();
+  MX_ADC1_Init();
+  MX_I2C1_Init();
+  MX_LPUART1_UART_Init();
+  MX_USART1_UART_Init();
+  MX_USART3_UART_Init();
+  MX_RTC_Init();
+  MX_TAMP_RTC_Init();
   /* USER CODE BEGIN 2 */
 
 
@@ -107,13 +121,13 @@ int main(void)
 	  }
 
 	  HAL_Delay(10);
+//	  PWM COMMANDS!
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 	  if (HAL_GetTick() > mstick)
 	  {
 		  LL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		  LL_GPIO_TogglePin(LDX_GPIO_Port, LDX_Pin);
 		  mstick = HAL_GetTick() + 200;
 	  }
   }
@@ -160,7 +174,9 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSIS;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_MSIS;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+  RCC_OscInitStruct.LSIDiv = RCC_LSI_DIV1;
   RCC_OscInitStruct.MSISState = RCC_MSI_ON;
   RCC_OscInitStruct.MSISSource = RCC_MSI_RC0;
   RCC_OscInitStruct.MSISDiv = RCC_MSI_DIV2;
@@ -187,7 +203,21 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+volatile uint8_t tamper1_flag = 0;
+volatile uint8_t tamper2_flag = 0;
+volatile uint32_t tamper1_count = 0;
 
+
+void HAL_RTCEx_Tamper1EventCallback(RTC_HandleTypeDef *hrtc)
+{
+    tamper1_flag = 1;
+    tamper1_count++;
+}
+
+void HAL_RTCEx_Tamper2EventCallback(RTC_HandleTypeDef *hrtc)
+{
+    tamper2_flag = 1;
+}
 /* USER CODE END 4 */
 
 /**

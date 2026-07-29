@@ -35,8 +35,6 @@
 /** Configure pins
      PC14-OSC32_IN (PC14)   ------> RCC_OSC32_IN
      PC15-OSC32_OUT (PC15)   ------> RCC_OSC32_OUT
-     PA9   ------> USART1_TX
-     PA10   ------> USART1_RX
      PA13 (JTMS/SWDIO)   ------> DEBUG_JTMS-SWDIO
      PA15 (JTDI)   ------> DEBUG_JTDI
      PB3 (JTDO/TRACESWO)   ------> DEBUG_JTDO-SWO
@@ -52,20 +50,7 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LDX_GPIO_Port, LDX_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LEDY_Pin|LEDR_Pin|LEDG_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : LDX_Pin */
-  GPIO_InitStruct.Pin = LDX_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LDX_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
   GPIO_InitStruct.Pin = LD2_Pin;
@@ -73,21 +58,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : LEDY_Pin LEDR_Pin LEDG_Pin */
-  GPIO_InitStruct.Pin = LEDY_Pin|LEDR_Pin|LEDG_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : VCP_TX_Pin VCP_RX_Pin */
-  GPIO_InitStruct.Pin = VCP_TX_Pin|VCP_RX_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DEBUG_JTMS_SWDIO_Pin DEBUG_JTDI_Pin */
   GPIO_InitStruct.Pin = DEBUG_JTMS_SWDIO_Pin|DEBUG_JTDI_Pin;
