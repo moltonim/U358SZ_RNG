@@ -19,8 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "icache.h"
-#include "rng.h"
-#include "aes.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -40,7 +39,10 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define LED1(x)	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, x)
+#define LED2(x)	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, x)
+#define LED3(x)	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, x)
+//__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, random_value_led2);
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -57,72 +59,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static void SystemClock_Config_Board(void)
-{
-    __HAL_RCC_PWR_CLK_ENABLE();
-
-    if (HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY) != HAL_OK)
-        Error_Handler();
-
-    __HAL_FLASH_SET_LATENCY(FLASH_LATENCY_1);
-
-    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE2) != HAL_OK)
-        Error_Handler();
-
-    HAL_PWR_EnableBkUpAccess();
-    __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
-
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48
-                                     | RCC_OSCILLATORTYPE_LSE
-                                     | RCC_OSCILLATORTYPE_MSIS
-                                     | RCC_OSCILLATORTYPE_MSIK;
-    RCC_OscInitStruct.HSI48State    = RCC_HSI48_ON;
-    RCC_OscInitStruct.LSEState      = RCC_LSE_ON;
-    RCC_OscInitStruct.MSISState     = RCC_MSI_ON;
-    RCC_OscInitStruct.MSISSource    = RCC_MSI_RC0;
-    RCC_OscInitStruct.MSISDiv       = RCC_MSI_DIV2;   /* MSIS = 48MHz */
-    RCC_OscInitStruct.MSIKState     = RCC_MSI_ON;
-    RCC_OscInitStruct.MSIKSource    = RCC_MSI_RC0;
-    RCC_OscInitStruct.MSIKDiv       = RCC_MSI_DIV8;   /* MSIK = 12MHz per RNG */
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-        Error_Handler();
-
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-    RCC_ClkInitStruct.ClockType      = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-                                     | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2
-                                     | RCC_CLOCKTYPE_PCLK3;
-    RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_MSIS;
-    RCC_ClkInitStruct.AHBCLKDivider  = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-    RCC_ClkInitStruct.APB3CLKDivider = RCC_HCLK_DIV2;
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
-        Error_Handler();
-
-    __HAL_RCC_CRS_CLK_ENABLE();
-
-    RCC_CRSInitTypeDef RCC_CRSInitStruct = {0};
-    RCC_CRSInitStruct.Prescaler           = RCC_CRS_SYNC_DIV1;
-    RCC_CRSInitStruct.Source              = RCC_CRS_SYNC_SOURCE_LSE;
-    RCC_CRSInitStruct.Polarity            = RCC_CRS_SYNC_POLARITY_RISING;
-    RCC_CRSInitStruct.ReloadValue         = __HAL_RCC_CRS_RELOADVALUE_CALCULATE(48000000, 32768);
-    RCC_CRSInitStruct.ErrorLimitValue     = 34;
-    RCC_CRSInitStruct.HSI48CalibrationValue = 32;
-    HAL_RCCEx_CRSConfig(&RCC_CRSInitStruct);
-
-    while(__HAL_RCC_GET_FLAG(RCC_FLAG_HSI48RDY) == 0);
-    while(__HAL_RCC_GET_FLAG(RCC_FLAG_LSERDY)   == 0);
-
-    HAL_RCC_ConfigAttributes(RCC_RMVF, RCC_SEC_NPRIV);
-}
-
-
-__ALIGN_BEGIN uint32_t buf_in [SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
-  __ALIGN_BEGIN uint32_t buf_out[SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
-  __ALIGN_BEGIN uint32_t buf[SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
-//  __ALIGN_BEGIN uint32_t plain2[SEC_MAX_CRYPTO_BUF/4] __ALIGN_END;
-
 
 /* USER CODE END 0 */
 
@@ -151,52 +87,46 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  clock_done:
 //    MX_GTZC_S_Init();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_RNG_Init();
-  MX_SAES_AES_Init();
   MX_ICACHE_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
-  uint32_t rng_cr = hrng.Instance->CR;
-  uint32_t rng_sr = hrng.Instance->SR;
-  uint32_t rng_htsr1 = hrng.Instance->HTSR[0];  /* Health test status */
-  uint32_t rng_htsr2 = hrng.Instance->HTSR[1];  /* Health test status */
-
-  uint32_t rcc_cr = RCC->CR;
-  __NOP();
-
-
-
-  memcpy(buf_in, "Hello AES World!", 16);
-
-  if (HAL_CRYP_Encrypt(&hcryp, buf_in, 16, buf_out, HAL_MAX_DELAY) != HAL_OK)
-  {
-	  return -3;
-  }
-
-  if (HAL_CRYP_Decrypt(&hcryp, buf_out, 16, buf, HAL_MAX_DELAY) != HAL_OK)
-  {
-	  return -4;
-  }
-
-
-
-  //HAL_CRYP_Encrypt(&hcryp, plain, 16, cipher, HAL_MAX_DELAY);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  static int16_t duty = 0;
+  static int8_t direction = 1;
+  uint32_t mstick = HAL_GetTick() + 200;
   while (1)
   {
+	  duty += direction;
+	  if (duty >= 255 || duty <= 0) {
+		  direction = -direction;
+	  }
+
+	  HAL_Delay(10);
+	  LED1(duty);
+	  LED2(duty);
+	  LED3(duty);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  if (HAL_GetTick() > mstick)
+	  {
+		  LL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		  LL_GPIO_TogglePin(LDX_GPIO_Port, LDX_Pin);
+		  mstick = HAL_GetTick() + 200;
+	  }
   }
   /* USER CODE END 3 */
 }
@@ -241,8 +171,7 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_MSIS;
-  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSIS;
   RCC_OscInitStruct.MSISState = RCC_MSI_ON;
   RCC_OscInitStruct.MSISSource = RCC_MSI_RC0;
   RCC_OscInitStruct.MSISDiv = RCC_MSI_DIV2;
