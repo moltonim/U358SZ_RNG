@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "icache.h"
-#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -39,9 +38,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define LED1(x)	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, x)
-#define LED2(x)	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, x)
-#define LED3(x)	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, x)
 //__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, random_value_led2);
 /* USER CODE END PM */
 
@@ -93,12 +89,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_ICACHE_Init();
-  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 
   /* USER CODE END 2 */
 
@@ -115,9 +107,6 @@ int main(void)
 	  }
 
 	  HAL_Delay(10);
-	  LED1(duty);
-	  LED2(duty);
-	  LED3(duty);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
